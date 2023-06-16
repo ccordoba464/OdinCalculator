@@ -21,34 +21,59 @@ function divide(a, b) {
 }
 
 function operate(a, b, operator) {
+  let answer;
   switch (operator) {
     case "+":
-      return add(a, b);
+      answer = add(a, b);
+      break;
     case "-":
-      return subtract(a, b);
+      answer = subtract(a, b);
+      break;
     case "x":
-      return multiply(a, b);
+      answer = multiply(a, b);
+      break;
     case "÷":
-      return divide(a, b);
+      answer = divide(a, b);
+      break;
   }
+  let factor = 10 ** 3;
+  return Math.round(answer * factor) / factor;
 }
 
 function displayValue(newValue) {
   const display = document.getElementById("display");
+  const reset = document.getElementById("reset");
+
   if (
     operator === undefined &&
     !operators.includes(newValue) &&
     newValue !== "CE"
   ) {
-    firstOperand == 0 ? (firstOperand = newValue) : (firstOperand += newValue);
-    display.textContent = `${firstOperand}`;
+    if (reset.textContent === "AC") {
+      reset.textContent = "CE";
+      if (newValue === "AC") {
+        display.textContent = 0;
+        firstOperand = 0;
+      } else {
+        firstOperand = newValue;
+        display.textContent = `${firstOperand}`;
+      }
+    } else {
+      firstOperand == 0
+        ? (firstOperand = newValue)
+        : (firstOperand += newValue);
+      display.textContent = `${firstOperand}`;
+    }
   } else if (operator === undefined && newValue !== "=") {
+    reset.textContent = "CE";
     if (newValue !== "CE") {
       operator = newValue;
       display.textContent = `${firstOperand} ${operator}`;
     } else {
       firstOperand = firstOperand.slice(0, -1);
-      display.textContent = `${firstOperand}`;
+      firstOperand !== ""
+        ? (display.textContent = `${firstOperand}`)
+        : (display.textContent = 0);
     }
   } else if (operator !== undefined && !operators.includes(newValue)) {
     if (newValue !== "CE") {
@@ -56,7 +81,6 @@ function displayValue(newValue) {
       display.textContent = `${firstOperand} ${operator} ${secondOperand}`;
     } else {
       if (secondOperand === "") {
-        console.log("TEST");
         operator = undefined;
         display.textContent = `${firstOperand}`;
       } else {
@@ -64,32 +88,22 @@ function displayValue(newValue) {
         display.textContent = `${firstOperand} ${operator} ${secondOperand}`;
       }
     }
-  } else if (newValue === "=" || newValue === "CE") {
-    if (newValue === "=") {
+  } else if (newValue === "=") {
+    if (firstOperand !== 0 && operator !== undefined && secondOperand !== "") {
       let answer = operate(+firstOperand, +secondOperand, operator);
-      display.textContent = answer;
-      firstOperand = answer;
-      secondOperand = null;
+      if (answer == Infinity) {
+        display.textContent = "Try again mfer";
+        firstOperand = 0;
+      } else {
+        display.textContent = answer;
+        firstOperand = answer.toString();
+      }
+      secondOperand = "";
       operator = undefined;
       calculation = true;
-      const button = document.getElementById("reset");
-      button.textContent = "AC";
+      reset.textContent = "AC";
     }
   }
-
-  console.log(firstOperand);
-  console.log(secondOperand);
-  console.log(operator);
-}
-
-function AC() {
-  firstOperand = null;
-  secondOperand = null;
-  operator = undefined;
-  calculation = false;
-  const button = document.getElementById("reset");
-  button.textContent = EC;
-  display.textContent = 0;
 }
 
 const buttons = document.querySelectorAll(".calc-button");
